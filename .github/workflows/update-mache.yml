@@ -107,6 +107,7 @@ jobs:
       - name: Update Version
         id: update
         run: |
+          gh auth setup-git
           ./gradlew update --ci --no-daemon
           branch_name=$(git rev-parse --abbrev-ref HEAD)
           echo "new_branch_name=${branch_name}" >> $GITHUB_OUTPUT
