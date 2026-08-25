@@ -91,6 +91,7 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: "mache"
+          permission-contents: write
       - uses: actions/checkout@v7
         with:
           repository: "${{ github.repository_owner }}/mache"
