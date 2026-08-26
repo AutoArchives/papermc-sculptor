@@ -46,7 +46,7 @@ abstract class UpdateVersion : DefaultTask() {
     abstract val type: Property<String>
 
     @get:Internal
-    abstract val gitToken: Property<String>
+    abstract val githubPushToken: Property<String>
 
     @get:Inject
     abstract val layout: ProjectLayout
@@ -57,7 +57,7 @@ abstract class UpdateVersion : DefaultTask() {
     init {
         latest.convention(false)
         ci.convention(false)
-        gitToken.convention(providers.environmentVariable("GH_TOKEN"))
+        githubPushToken.convention(providers.environmentVariable("GH_TOKEN"))
     }
 
     @OptionValues("type")
@@ -163,8 +163,8 @@ abstract class UpdateVersion : DefaultTask() {
             git.commit().setMessage("Update to $to").setAuthor(PersonIdent("Sculptor", "166456271+mache-sculptor[bot]@users.noreply.github.com"))
                 .call()
             val push = git.push()
-            if (gitToken.isPresent) {
-                push.setCredentialsProvider(UsernamePasswordCredentialsProvider(gitToken.get(), ""))
+            if (githubPushToken.isPresent) {
+                push.setCredentialsProvider(UsernamePasswordCredentialsProvider("x-access-token", githubPushToken.get()))
             }
             push.call()
         }
