@@ -92,7 +92,6 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: "mache"
           permission-contents: write
-      # TODO: since v6 the git credentials are in a temp file
       - uses: actions/checkout@v7
         with:
           repository: "${{ github.repository_owner }}/mache"
