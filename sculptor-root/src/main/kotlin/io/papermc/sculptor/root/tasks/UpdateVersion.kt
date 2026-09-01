@@ -8,11 +8,14 @@ import io.papermc.sculptor.shared.data.json
 import io.papermc.sculptor.shared.util.dotGradleDirectory
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.PersonIdent
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
@@ -42,12 +45,19 @@ abstract class UpdateVersion : DefaultTask() {
     @get:Optional
     abstract val type: Property<String>
 
+    @get:Internal
+    abstract val githubPushToken: Property<String>
+
     @get:Inject
     abstract val layout: ProjectLayout
+
+    @get:Inject
+    abstract val providers: ProviderFactory
 
     init {
         latest.convention(false)
         ci.convention(false)
+        githubPushToken.convention(providers.environmentVariable("GH_TOKEN"))
     }
 
     @OptionValues("type")
@@ -152,7 +162,11 @@ abstract class UpdateVersion : DefaultTask() {
         if (ci.get()) {
             git.commit().setMessage("Update to $to").setAuthor(PersonIdent("Sculptor", "166456271+mache-sculptor[bot]@users.noreply.github.com"))
                 .call()
-            git.push().call()
+            val push = git.push()
+            if (githubPushToken.isPresent) {
+                push.setCredentialsProvider(UsernamePasswordCredentialsProvider("x-access-token", githubPushToken.get()))
+            }
+            push.call()
         }
     }
 
